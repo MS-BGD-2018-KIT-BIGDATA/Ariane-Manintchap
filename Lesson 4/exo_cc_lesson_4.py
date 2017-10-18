@@ -52,10 +52,11 @@ for town1 in towns:
     for town2 in towns:
         url3 = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + town1 + ",FR&destinations=" + town2 +",FR&key=" + key 
         dist = requests.get(url3)
-        distanceTown.loc[town1,town2] = dist.json()['rows'][0]['elements'][0]['distance']['text']
+        distance = dist.json()["rows"][0]['elements'][0]
+        if distance["status"] == "OK":
+            distanceTown.loc[town1,town2] = distance['distance']['text'].split(" ")[0]
 
 
-https://maps.googleapis.com/maps/api/distancematrix/json?origins=Paris&destinations=Nancy
 
 
 
