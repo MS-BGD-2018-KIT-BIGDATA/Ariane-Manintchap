@@ -1,13 +1,13 @@
 # Récupération via crawling de la liste des 256 top contributors sur cette 
 # page https://gist.github.com/paulmillr/2657075
 # En utilisant l'API github https://developer.github.com/v3/ récupérer pour 
-# chacun de ces users le nombre moyens de stars des repositories qui leur 
+# chacun de ces users le nombre moyens de stars (i.e stargazers) des repositories qui leur 
 # appartiennent. Pour finir classer ces 256 contributors par leur note moyenne.﻿
-# voir la première fonction de françois (à prendre)
 
 
 import requests
 import pandas as pd
+import numpy as np
 from bs4 import BeautifulSoup
 
 
@@ -30,9 +30,6 @@ def getSoupFromURL(url, method='get', data={}):
 
 soup = getSoupFromURL(url)
 
-#rows = soup.find_all("th", scope = "row")
-#for row in rows:
-#    print(row.parent.text + " " + row.parent.td.text)
 
 def getUserNames(url):
     soup = getSoupFromURL(url)
@@ -42,22 +39,31 @@ def getUserNames(url):
     return(Usernames)
         
 
-Usernames = getUserNames(url)    
+Usernames = getUserNames(url) 
+
+   
 for i in range(0,256):
     print('#' + str(i+1) + ' ' + Usernames[i])
 
-def getNomberMeanofStarUser(user):
-    #url_search = "https://github.com/" + user
+def getNomberMeanOfStarUser(user):
+    # url_search = "https://api.github.com/users/GrahamCampbell/repos"
     url_search = "https://api.github.com/users/" + user + "/repos"
     res = requests.get(url_search) 
     if res.status_code == 200:
         mean = pd.Series([rep['stargazers_count'] for rep in res.json()]).mean()
-        return print("Le nombre moyen de star des repositories de l user " + user +" est " + str(mean))   
+        #print("Le nombre moyen de star des repositories de l user " + user +" est " + str(mean))
+        return(mean)    
     else:
-        return 'url wrong response'
-    
-for user in Usernames:
-    print(getNomberMeanofStarUser(user))   
+        # print ('url wrong response')
+        return np.nan
  
 
+Contributors = pd.DataFrame(index = Usernames, columns=["stargazers_mean"])
+
+
+for user in Usernames:
+    Contributors.loc[user,"stargazers_mean"] = getNomberMeanOfStarUser(user)
+    #print(getNomberMeanOfStarUser(user))   
+ 
+print(Contributors.sort_values(["stargazers_mean"], ascending=True))
 

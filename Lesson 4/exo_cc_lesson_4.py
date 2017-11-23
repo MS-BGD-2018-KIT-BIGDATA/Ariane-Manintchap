@@ -1,20 +1,9 @@
-# Connaitre les distances en voiture villes √  villes 
-# dans le but d'implanter des bureaux commerciaux en france
-# r√©cu√©rer la liste des 100 plus grandes villes
-# puis sortir la matrice des distances
-# API √  utiliser: google distance matrice API
-# https://developers.google.com/maps/documentation/distance-matrix/?hl=fr
-# Cyril Nguyen
-# joseph asouline
+# ibuprofene
 
+import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-import pandas as pd
-import re
 
-
-url = "https://lespoir.jimdo.com/2015/03/05/classement-des-plus-grandes-villes-de-france-source-insee/"
-url1 = "https://developers.google.com/maps/documentation/distance-matrix/?hl=fr"
 
 def getSoupFromURL(url, method='get', data={}):
 
@@ -31,33 +20,24 @@ def getSoupFromURL(url, method='get', data={}):
   else:
     return None
 
-soup = getSoupFromURL(url)
 
-#Api = getSoupFromURL(url1)
-
-def getTowns(url):
-    soup = getSoupFromURL(url)
-    Towns = []        
-    for i in range(1,10):
-        Towns += [soup.find_all("td", class_ ="xl65")[3*i-2].text.strip()]
-    return(Towns)
-    
-towns = getTowns(url)
-
-distanceTown = pd.DataFrame(index = towns, columns=towns)
-
-key = "AIzaSyBdEWDYTFKG0MsKxpY13uNt3QyV-YCe620"
-
-for town1 in towns:
-    for town2 in towns:
-        url3 = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + town1 + ",FR&destinations=" + town2 +",FR&key=" + key 
-        dist = requests.get(url3)
-        distance = dist.json()["rows"][0]['elements'][0]
-        if distance["status"] == "OK":
-            distanceTown.loc[town1,town2] = distance['distance']['text'].split(" ")[0]
-
-
-
+url = "https://open-medicaments.fr/api/v1/medicaments?limit=100&query=ibuprofene"
+soup = requests.get(url)
+labels = ['Name','Prix','Annee','Mois']
+Medivament = []
+for i in range(0,100):
+    code = soup.json()[i]['codeCIS']
+    name = soup.json()[i]['denomination']
+    url1 = "https://open-medicaments.fr/api/v1/medicaments/" + code
+    res1 = requests.get(url1)
+    price = res1.json()['presentations'][0]['prix']
+    date = res1.json()['dateAMM']
+    date = date.split('-')
+    year = date[0]
+    month  = date[1]
+    Medivament.append([name,price,year,month])
+df = pd.DataFrame.from_records(Medivament, columns=labels)
+df.to_csv('ibuprofene.csv')
 
 
 

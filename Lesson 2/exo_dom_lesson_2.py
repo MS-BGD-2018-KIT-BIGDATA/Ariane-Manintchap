@@ -32,8 +32,8 @@ for j in years:
     print('Comptes ville de Paris pour les exercices de ' + str(j))
     for i in [0, 1, 3, 4]:
         print(libele[i].text)
-        print(amount[3*i].text + 'milliers d euro')
-        print(amount[3*i + 1].text + 'euros par habitants')
-        print(amount[3*i + 2].text + 'en moyenne de la strate')
+        print(amount[3*i].text + "milliers d euro")
+        print(amount[3*i + 1].text + "euros par habitants")
+        print(amount[3*i + 2].text + "en moyenne de la strate")
 
 
